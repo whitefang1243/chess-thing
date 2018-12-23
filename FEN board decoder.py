@@ -1,3 +1,5 @@
+import copy
+
 COLUMNS=["a","b","c","d","e","f","g","h"]
 ROWS=["1","2","3","4","5","6","7","8"]
 
@@ -19,8 +21,10 @@ def minmax(board,to_move,layer):
     if layer>6:
         return get_score(board)
     best=[]
+    start=[]
     best_value=to_move*-1*1000000000000
     in_check=False
+    found_move=False
     for i in range(0,8):
         if in_check==True:
             break
@@ -32,47 +36,59 @@ def minmax(board,to_move,layer):
                     in_check=True
                     possible=king_move(board,i,j,1)
                     if possible==[]:
-                        return -1000000
+                        return [-1000000,[],[]]
                     else:
+                        found_move=True
                         for k in range(0,len(possible)):
-                            new_board=make_move(board,[i,j],possible[k])
+                            new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
                             comp_score=minmax(new_board,to_move*-1,layer+1)
-                            if coomp_score[0]>best_value:
+                            if comp_score[0]>best_value:
                                 best_value=comp_score
                                 best=possible[k]
+                                start=[i,j]
                 elif board[i][j]=="N":
                     #ADD OTHER PIECES
                     possible=knight_move(board,i,j,1)
+                    if len(possible)>0:
+                        found_move=True
                     for k in range(0,len(possible)):
-                        new_board=make_move(board,[i,j],possible[k])
+                        new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
                         comp_score=minmax(new_board,to_move*-1,layer+1)
-                        if coomp_score[0]>best_value:
-                            best_value=comp_score
+                        if comp_score[0]>best_value:
+                            best_value=comp_score[0]
                             best=possible[k]
+                            start=[i,j]
             
             elif to_move==-1 and board[i][j] in BLACK:
                 if board[i][j]=="k" and check_check(board,i,j,to_move)==True:
                     in_check=True
                     possible=king_move(board,i,j,-1)
                     if possible==[]:
-                        return 1000000
+                        return [1000000,[],[]]
                     else:
+                        found_move=True
                         for k in range(0,len(possible)):
-                            new_board=make_move(board,[i,j],possible[k])
+                            new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
                             comp_score=minmax(new_board,to_move*-1,layer+1)
-                            if coomp_score[0]>best_value:
+                            if comp_score[0]>best_value:
                                 best_value=comp_score[0]
                                 best=possible[k]
+                                start=[i,j]
                 elif board[i][j]=="n":
                     #ADD OTHER PIECES
                     possible=knight_move(board,i,j,-1)
+                    if len(possible)>0:
+                        found_move=True
                     for k in range(0,len(possible)):
-                        new_board=make_move(board,[i,j],possible[k])
+                        new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
                         comp_score=minmax(new_board,to_move*-1,layer+1)
-                        if coomp_score[0]>best_value:
-                            best_value=comp_score
+                        if comp_score[0]>best_value:
+                            best_value=comp_score[0]
                             best=possible[k]
-    return [best_value,best]
+                            start=[i,j]
+    if found_move==False:
+        return [0,[],[]]
+    return [best_value,start,best]
                         
 
                             
@@ -235,7 +251,8 @@ def main(inp):
     return board
 
 #print(main("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"))
-test=main("8/8/8/8/8/6N1/3nkK2/7N w - - 1 0")
-print(knight_move(test,0,7,1))
-print(king_move(test,1,5,1))
-print(check_check(test,1,5,1))
+test=main("kr6/pp6/8/1K1N4/8/8/8/8 w - - 1 0")
+#print(knight_move(test,0,7,1))
+#print(king_move(test,1,5,1))
+#print(check_check(test,1,5,1))
+print(minmax(test,1,1))
