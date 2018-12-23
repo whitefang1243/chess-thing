@@ -48,7 +48,8 @@ def minmax(board,to_move,layer):
                         comp_score=minmax(new_board,to_move*-1,layer+1)
                         if coomp_score[0]>best_value:
                             best_value=comp_score
-                            best=possible[k]                    
+                            best=possible[k]
+            
             elif to_move==-1 and board[i][j] in BLACK:
                 if board[i][j]=="k" and check_check(board,i,j,to_move)==True:
                     in_check=True
@@ -63,6 +64,7 @@ def minmax(board,to_move,layer):
                                 best_value=comp_score[0]
                                 best=possible[k]
                 elif board[i][j]=="n":
+                    #ADD OTHER PIECES
                     possible=knight_move(board,i,j,-1)
                     for k in range(0,len(possible)):
                         new_board=make_move(board,[i,j],possible[k])
@@ -145,9 +147,8 @@ def check_check(board,startx,starty,to_move):
                     if[startx,starty] in possible:
                         return True
                 elif board[x][y]=="k":
-                    possible=king_move(board,x,y,-1)
-                    if[startx,starty] in possible:
-                        return True                    
+                    if abs(startx-x)<=1 and abs(starty-y<=1):
+                        return True
             else:
                 if board[x][y] in BLACK or board[x][y]==" ":
                     continue
@@ -156,9 +157,8 @@ def check_check(board,startx,starty,to_move):
                     if[startx,starty] in possible:
                         return True
                 elif board[x][y]=="K":
-                    possible=king_move(board,x,y,-1)
-                    if[startx,starty] in possible:
-                        return True                  
+                    if abs(startx-x)<=1 and abs(starty-y<=1):
+                        return True                 
     return False
 
 
@@ -234,4 +234,8 @@ def main(inp):
     board[-1].append(int(inp[curr]))
     return board
 
-print(main("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"))
+#print(main("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"))
+test=main("8/8/8/8/8/6N1/3nkK2/7N w - - 1 0")
+print(knight_move(test,0,7,1))
+print(king_move(test,1,5,1))
+print(check_check(test,1,5,1))
