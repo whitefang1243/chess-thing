@@ -6,8 +6,10 @@ ROWS=["1","2","3","4","5","6","7","8"]
 WHITE=set(["P","K","Q","B","N","R"])
 BLACK=set(["p","k","q","b","n","r"])
 SCORE={"P":1,"K":0,"Q":9,"B":3,"N":3,"R":5,"p":-1,"k":0,"q":-9,"b":-3,"n":-3,"r":-5," ":0}
-
-
+MATE=99999999
+reached=set([])
+flag1=False
+flag2=False
 
 def get_score (board):
     ret=0
@@ -18,76 +20,126 @@ def get_score (board):
 
 
 def minmax(board,to_move,layer):
+    global flag1
+    global flag2
+    if flag1==True and flag2==True:
+        for i in range(7,-1,-1):
+            print(board[i])    
+        flag2=False
+    if str([board,layer]) in reached:                       #ACCOUNT FOR FINAL LINE LATER
+        return [to_move*10000000000000,[],[]]
+    else:
+        reached.add(str([board,layer]))
     if layer>6:
-        return get_score(board)
+        return [get_score(board),[],[]]
     best=[]
     start=[]
     best_value=to_move*-1*1000000000000
-    in_check=False
     found_move=False
+    f=False
+    if to_move==1:
+        for i in range(0,8):
+            if "K" in board[i]:
+                j=board[i].index("K")
+                if board[i][j]=="K":
+                    ki=i
+                    kj=j
+                    f=True
+                    break
+                    
+    else:
+        for i in range(0,8):
+            if "k" in board[i]:
+                j=board[i].index("k")
+                if board[i][j]=="k":
+                    ki=i
+                    kj=j
+                    f=True
+                    break
+                    
     for i in range(0,8):
-        if in_check==True:
-            break
         for j in range(0,8):
-            if in_check==True:
-                break
+            if f==False:
+                for i in range(7,-1,-1):
+                    print(board[i])       
+                print("")                
             if to_move==1 and board[i][j] in WHITE:
-                if board[i][j]=="K" and check_check(board,i,j,to_move)==True:
-                    in_check=True
+                if board[i][j]=="K":
                     possible=king_move(board,i,j,1)
-                    if possible==[]:
-                        return [-1000000,[],[]]
-                    else:
+                    for k in range(0,len(possible)):
+                        new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
+                        if check_check(new_board,possible[k][0],possible[k][1],to_move)==True:
+                            continue
                         found_move=True
-                        for k in range(0,len(possible)):
-                            new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
-                            comp_score=minmax(new_board,to_move*-1,layer+1)
-                            if comp_score[0]>best_value:
-                                best_value=comp_score
-                                best=possible[k]
-                                start=[i,j]
+                        comp_score=minmax(new_board,to_move*-1,layer+1)
+                        if comp_score[0]==MATE:
+                            return [MATE,[i,j],possible[k]]
+                        if comp_score[0]>best_value:
+                            best_value=comp_score[0]
+                            best=possible[k]
+                            start=[i,j]
                 elif board[i][j]=="N":
                     #ADD OTHER PIECES
                     possible=knight_move(board,i,j,1)
-                    if len(possible)>0:
-                        found_move=True
                     for k in range(0,len(possible)):
+                        if possible[k]==[5,2] and layer==1:
+                            print("found")
+                            print(best_value)
+                            flag1=True
+                        if layer==3 and j==7 and flag1==True and k==1 and board[5][2]=="N":
+                            print(board[5][2])
+                            print("next")
+                            flag2=True
                         new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
+                        if check_check(new_board,ki,kj,to_move)==True:
+                            continue                        
+                        found_move=True
                         comp_score=minmax(new_board,to_move*-1,layer+1)
+                        if comp_score[0]==MATE:
+                            return [MATE,[i,j],possible[k]]                        
                         if comp_score[0]>best_value:
                             best_value=comp_score[0]
                             best=possible[k]
                             start=[i,j]
             
             elif to_move==-1 and board[i][j] in BLACK:
-                if board[i][j]=="k" and check_check(board,i,j,to_move)==True:
-                    in_check=True
+                if board[i][j]=="k":
                     possible=king_move(board,i,j,-1)
-                    if possible==[]:
-                        return [1000000,[],[]]
-                    else:
+                    for k in range(0,len(possible)):
+                        new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
+                        if check_check(new_board,possible[k][0],possible[k][1],to_move)==True:
+                            continue
                         found_move=True
-                        for k in range(0,len(possible)):
-                            new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
-                            comp_score=minmax(new_board,to_move*-1,layer+1)
-                            if comp_score[0]>best_value:
-                                best_value=comp_score[0]
-                                best=possible[k]
-                                start=[i,j]
+                        comp_score=minmax(new_board,to_move*-1,layer+1)
+                        if comp_score==-MATE:
+                            return [-MATE,[i,j],possible[k]]                            
+                        if comp_score[0]<best_value:
+                            best_value=comp_score[0]
+                            best=possible[k]
+                            start=[i,j]
                 elif board[i][j]=="n":
                     #ADD OTHER PIECES
                     possible=knight_move(board,i,j,-1)
-                    if len(possible)>0:
-                        found_move=True
                     for k in range(0,len(possible)):
+                        if k==3 and possible[k]==[5,5] and flag1==True and layer==2:
+                            flag2=True
                         new_board=make_move(copy.deepcopy(board),[i,j],possible[k])
+                        if check_check(new_board,ki,kj,to_move)==True:
+                            continue                         
+                        found_move=True
                         comp_score=minmax(new_board,to_move*-1,layer+1)
-                        if comp_score[0]>best_value:
+                        if comp_score==-MATE:
+                            return [-MATE,[i,j],possible[k]]                        
+                        if comp_score[0]<best_value:
                             best_value=comp_score[0]
                             best=possible[k]
                             start=[i,j]
     if found_move==False:
-        return [0,[],[]]
+        print(f,ki,kj)
+        if check_check(board,ki,kj,to_move)==False:
+            return [0,[],[]]
+        else:
+            return [MATE*to_move*-1,[],[]]
     return [best_value,start,best]
                         
 
@@ -96,6 +148,12 @@ def minmax(board,to_move,layer):
 
 def make_move(board,start,end):
     to_move=board[start[0]][start[1]]
+    if board[end[0]][end[1]]=="k" or board[end[0]][end[1]]=="K":
+        print("Error")
+        for i in range(7,-1,-1):
+            print(board[i])       
+        print("")         
+        print("Error")
     board[start[0]][start[1]]=" "
     board[end[0]][end[1]]=to_move
     return board
@@ -163,17 +221,19 @@ def check_check(board,startx,starty,to_move):
                     if[startx,starty] in possible:
                         return True
                 elif board[x][y]=="k":
-                    if abs(startx-x)<=1 and abs(starty-y<=1):
+                    if abs(startx-x)<=1 and abs(starty-y)<=1:
                         return True
             else:
                 if board[x][y] in BLACK or board[x][y]==" ":
                     continue
+                if flag1==True and flag2==True:
+                    print(board[x][y])
                 if board[x][y]=="N":
                     possible=knight_move(board,x,y,1)
                     if[startx,starty] in possible:
                         return True
                 elif board[x][y]=="K":
-                    if abs(startx-x)<=1 and abs(starty-y<=1):
+                    if abs(startx-x)<=1 and abs(starty-y)<=1:
                         return True                 
     return False
 
@@ -251,8 +311,11 @@ def main(inp):
     return board
 
 #print(main("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"))
-test=main("kr6/pp6/8/1K1N4/8/8/8/8 w - - 1 0")
-#print(knight_move(test,0,7,1))
+test=main("4k1K1/3n3N/8/4N3/8/8/8/8 w - - 1 0")
+#for i in range(7,-1,-1):
+#    print(test[i])
+print(test[3][6])
+print(knight_move(test,4,4,1))
 #print(king_move(test,1,5,1))
-#print(check_check(test,1,5,1))
+print(check_check(test,7,4,-1))
 print(minmax(test,1,1))
