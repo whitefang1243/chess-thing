@@ -13,6 +13,7 @@ MATE=99999999
 
 
 reached=set([])
+
 flag1=False
 flag2=False
 
@@ -31,17 +32,20 @@ def minmax(board,to_move,layer):
     #    for i in range(7,-1,-1):
     #        print(board[i])    
     #    flag2=False
-    if str([board,layer]) in reached:                       #ACCOUNT FOR FINAL LINE LATER
+    if layer>6:
+        return [get_score(board),[],[]]    
+    if str(board) in reached:                       #ACCOUNT FOR FINAL LINE LATER
         return [to_move*10000000000000,[],[]]
+
     else:
         reached.add(str([board,layer]))
-    if layer>6:
-        return [get_score(board),[],[]]
     best=[]
     start=[]
     best_value=to_move*-1*1000000000000
     found_move=False
     f=False
+    ki=-1
+    kj=-1
     if to_move==1:
         for i in range(0,8):
             if "K" in board[i]:
@@ -61,13 +65,15 @@ def minmax(board,to_move,layer):
                     kj=j
                     f=True
                     break
-                    
+    #if ki==-1 or kj==-1:
+    #    for i in range(7,-1,-1):
+    #        print(board[i])    
+    #    print(to_move)
+    #    print(layer)
     for i in range(0,8):
         for j in range(0,8):
-            #if f==False:
-            #    for i in range(7,-1,-1):
-            #        print(board[i])       
-            #    print("")                
+            if board[i][j]==" ":
+                continue
             if to_move==1 and board[i][j] in WHITE:
                 if board[i][j]=="K":
                     possible=king_move(board,i,j,1)
@@ -86,6 +92,12 @@ def minmax(board,to_move,layer):
                 elif board[i][j]=="N":
                     #ADD OTHER PIECES
                     possible=knight_move(board,i,j,1)
+                    #if layer==5:
+                    #    print("found")
+                    #    for l in range(7,-1,-1):
+                    #        print(board[l])    
+                    #    print(to_move)
+                    #    print(layer)                        
                     for k in range(0,len(possible)):
                         #if possible[k]==[5,2] and layer==1:
                             #print("found")
@@ -215,32 +227,64 @@ def king_move(board,startx,starty,to_move):
     return possible    
     
 def check_check(board,startx,starty,to_move):
-    for x in range(0,8):
-        for y in range(0,8):
-            #ADD IN OTHER PIECES LATER
-            if to_move==1:
-                if board[x][y] in WHITE or board[x][y]==" ":
-                    continue
-                if board[x][y]=="n":
-                    possible=knight_move(board,x,y,-1)
-                    if[startx,starty] in possible:
-                        return True
-                elif board[x][y]=="k":
-                    if abs(startx-x)<=1 and abs(starty-y)<=1:
-                        return True
-            else:
-                if board[x][y] in BLACK or board[x][y]==" ":
-                    continue
-                if flag1==True and flag2==True:
-                    print(board[x][y])
-                if board[x][y]=="N":
-                    possible=knight_move(board,x,y,1)
-                    if[startx,starty] in possible:
-                        return True
-                elif board[x][y]=="K":
-                    if abs(startx-x)<=1 and abs(starty-y)<=1:
-                        return True                 
+    #ADD OTHER SHIT LATER
+    x_val=[-1,-1,-1,0,0,1,1,1]
+    y_val=[1,0,-1,-1,1,1,0,-1]    
+    if to_move==1:
+        possible=knight_move(board,startx,starty,1)
+        for i in range(0,len(possible)):
+            if board[possible[i][0]][possible[i][1]]=="n":
+                return True
+        currx=-1
+        curry=-1
+        for i in range(0,8):
+            currx=startx+x_val[i]
+            curry=starty+y_val[i]
+            if currx>7 or curry>7 or currx<0 or curry<0:
+                continue
+            if board[currx][curry]=="k":
+                return True
+    else:
+        possible=knight_move(board,startx,starty,-1)
+        for i in range(0,len(possible)):
+            if board[possible[i][0]][possible[i][1]]=="N":
+                return True
+        currx=-1
+        curry=-1
+        for i in range(0,8):
+            currx=startx+x_val[i]
+            curry=starty+y_val[i]
+            if currx>7 or curry>7 or currx<0 or curry<0:
+                continue
+            if board[currx][curry]=="K":
+                return True        
     return False
+    #for x in range(0,8):
+    #    for y in range(0,8):
+    #        #ADD IN OTHER PIECES LATER
+    #        if to_move==1:
+    #            if board[x][y] in WHITE or board[x][y]==" ":
+    #                continue
+    #            if board[x][y]=="n":
+    #                possible=knight_move(board,x,y,-1)
+    #                if[startx,starty] in possible:
+    #                    return True
+    #            elif board[x][y]=="k":
+    #                if abs(startx-x)<=1 and abs(starty-y)<=1:
+    #                    return True
+    #        else:
+    #            if board[x][y] in BLACK or board[x][y]==" ":
+    #                continue
+    #            if flag1==True and flag2==True:
+    #                print(board[x][y])
+    #            if board[x][y]=="N":
+    #                possible=knight_move(board,x,y,1)
+    #                if[startx,starty] in possible:
+    #                    return True
+    #            elif board[x][y]=="K":
+    #                if abs(startx-x)<=1 and abs(starty-y)<=1:
+    #                    return True                 
+    #return False
 
 
 
@@ -317,13 +361,15 @@ def main(inp):
 
 #print(main("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"))
 test=main("7k/8/3nN1KN/8/8/8/8/8 w - - 1 0")
+t2=main("6k1/8/6KN/8/2n5/8/2N5/8 w - - 1 0")
 #for i in range(7,-1,-1):
 #    print(test[i])
 #print(test[3][6])
 #print(knight_move(test,4,4,1))
 #print(king_move(test,1,5,1))
-#print(check_check(test,7,4,-1))
+print(check_check(t2,7,6,-1))
 s=time.time()
 print(minmax(test,1,1))
 e=time.time()
 print(e-s)
+#[99999999, [5, 4], [4, 6]]
