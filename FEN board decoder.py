@@ -165,12 +165,6 @@ def minmax(board,to_move,layer):
 
 def make_move(board,start,end):
     to_move=board[start[0]][start[1]]
-    #if board[end[0]][end[1]]=="k" or board[end[0]][end[1]]=="K":
-    #    print("Error")
-    #    for i in range(7,-1,-1):
-    #        print(board[i])       
-    #    print("")         
-    #    print("Error")
     board[start[0]][start[1]]=" "
     board[end[0]][end[1]]=to_move
     return board
@@ -225,7 +219,38 @@ def king_move(board,startx,starty,to_move):
             else:
                 possible.append([currx,curry])
     return possible    
-    
+
+
+def rook_move(board,startx,starty,to_move):
+    possible=[]
+    x_val=[1,-1,0,0]
+    y_val=[0,0,-1,1]
+    curr=""
+    for i in range(0,4):
+        currx=startx
+        curry=starty
+        for j in range(1,8):
+            currx+=x_val[i]
+            curry+=y_val[i]
+            if currx>7 or curry>7 or currx<0 or curry<0:
+                break
+            curr=board[currx][curry]
+            if to_move==1:
+                if curr in WHITE or check_check(board,currx,curry,to_move)==True:
+                    break
+                else:
+                    possible.append([currx,curry])
+            else:
+                if curr in BLACK or check_check(board,currx,curry,to_move)==True:
+                    break
+                else:
+                    possible.append([currx,curry])            
+    return possible
+
+
+
+
+
 def check_check(board,startx,starty,to_move):
     #ADD OTHER SHIT LATER
     x_val=[-1,-1,-1,0,0,1,1,1]
