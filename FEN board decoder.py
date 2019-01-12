@@ -236,18 +236,51 @@ def rook_move(board,startx,starty,to_move):
                 break
             curr=board[currx][curry]
             if to_move==1:
-                if curr in WHITE or check_check(board,currx,curry,to_move)==True:
+                if check_check(board,currx,curry,to_move)==True:
+                    continue
+                elif curr in WHITE:
                     break
                 else:
                     possible.append([currx,curry])
             else:
-                if curr in BLACK or check_check(board,currx,curry,to_move)==True:
+                if check_check(board,currx,curry,to_move)==True:
+                    continue                
+                if curr in BLACK:
                     break
                 else:
                     possible.append([currx,curry])            
     return possible
 
 
+def bishop_move(board,startx,starty,to_move):
+    possible=[]
+    x_val=[1,1,-1,-1]
+    y_val=[-1,1,-1,1]
+    curr=""
+    for i in range(0,4):
+        currx=startx
+        curry=starty
+        for j in range(1,8):
+            currx+=x_val[i]
+            curry+=y_val[i]
+            if currx>7 or curry>7 or currx<0 or curry<0:
+                break
+            curr=board[currx][curry]
+            if to_move==1:
+                if check_check(board,currx,curry,to_move)==True:
+                    continue
+                elif curr in WHITE:
+                    break
+                else:
+                    possible.append([currx,curry])
+            else:
+                if check_check(board,currx,curry,to_move)==True:
+                    continue                
+                if curr in BLACK:
+                    break
+                else:
+                    possible.append([currx,curry])           
+    return possible
 
 
 
